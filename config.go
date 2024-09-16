@@ -107,6 +107,9 @@ type Config struct {
 	// 変換結果に含める項目の有無の指定
 	GcpResultIsFinal   bool `ini:"gcp_result_is_final"`
 	GcpResultStability bool `ini:"gcp_result_stability"`
+
+	// deep gram
+	DeepGramAPIKey string `ini:"deep_gram_api_key"`
 }
 
 func NewConfig(configFilePath string) (*Config, error) {

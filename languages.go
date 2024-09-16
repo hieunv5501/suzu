@@ -29,7 +29,7 @@ func GetLanguageCode(serviceType, lang string, f func(string) (string, error)) (
 			}
 		}
 		return "", fmt.Errorf("%w: %s", ErrUnsupportedLanguageCode, lang)
-	case "gcp", "test", "dump":
+	case "gcp", "test", "dump", "deg":
 		return lang, nil
 	}
 
