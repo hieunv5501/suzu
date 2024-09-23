@@ -247,6 +247,9 @@ func (h *DeepGramHandler) Handle(ctx context.Context, reader io.Reader) (*io.Pip
 		Language:    h.LanguageCode,
 		Punctuate:   true,
 		SmartFormat: true,
+		SampleRate:  int(h.SampleRate),
+		Encoding:    "ogg-opus",
+		Channels:    int(h.ChannelCount),
 		// To get UtteranceEnd, the following must be set:
 		InterimResults: true,
 		UtteranceEndMs: "1000",
