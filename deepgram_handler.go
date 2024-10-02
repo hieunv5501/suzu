@@ -6,7 +6,9 @@ import (
 	"errors"
 	api "github.com/deepgram/deepgram-go-sdk/pkg/api/listen/v1/websocket/interfaces"
 	"github.com/deepgram/deepgram-go-sdk/pkg/client/interfaces"
+	"github.com/machinebox/graphql"
 	"io"
+	"log"
 	"strconv"
 	"strings"
 	"sync"
@@ -167,6 +169,9 @@ func (c MyCallback) Message(mr *api.MessageResponse) error {
 		}
 	}
 
+	// Send message to app sync
+	SendMessage("api-key", message, c.h.ConnectionID, c.h.ChannelID, *c.resultsID, c.h.LanguageCode)
+
 	return nil
 }
 
@@ -213,6 +218,62 @@ func (c MyCallback) Error(er *api.ErrorResponse) error {
 func (c MyCallback) UnhandledEvent(byData []byte) error {
 	// handle the unhandled event
 	return nil
+}
+
+func SendMessage(apiKey string, content string, connectionId string, channel string, resultsId string, language string) {
+	// URL AppSync của bạn
+	appsyncUrl := "https://4fhzbjhz55bt5pw5qvryydwgby.appsync-api.ap-southeast-1.amazonaws.com/graphql"
+
+	// Tạo GraphQL client
+	clientGraphQL := graphql.NewClient(appsyncUrl)
+
+	// Thêm các header để xác thực
+	clientGraphQL.Log = func(s string) { log.Println(s) }
+
+	// Mutation để gửi tin nhắn
+	mutation := `
+        mutation SendMessage(
+            $content: String!
+            $connectionId: String!
+            $channel: String!
+            $resultsId: String!
+            $language: String!
+        ) {
+            sendMessage(
+                content: $content
+                connectionId: $connectionId
+                channel: $channel
+                resultsId: $resultsId
+                language: $language
+        ) {
+            id
+            content
+            connectionId
+            channel
+            resultsId
+            language
+            __typename
+        }
+    }
+    `
+
+	req := graphql.NewRequest(mutation)
+	req.Var("content", content)
+	req.Var("connectionId", connectionId)
+	req.Var("channel", channel)
+	req.Var("resultsId", resultsId)
+	req.Var("language", language)
+
+	req.Header.Set("x-api-key", apiKey)
+
+	// Gửi yêu cầu đến AppSync
+	ctx := context.Background()
+	var respData map[string]interface{}
+	if err := clientGraphQL.Run(ctx, req, &respData); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("Message sent: %+v\n", respData)
 }
 
 func (h *DeepGramHandler) Handle(ctx context.Context, reader io.Reader) (*io.PipeReader, error) {
