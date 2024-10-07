@@ -110,6 +110,8 @@ type Config struct {
 
 	// deep gram
 	DeepGramAPIKey string `ini:"deep_gram_api_key"`
+	AppSyncUrl     string `ini:"app_sync_url"`
+	AppSyncApiKey  string `ini:"app_sync_api_key"`
 }
 
 func NewConfig(configFilePath string) (*Config, error) {

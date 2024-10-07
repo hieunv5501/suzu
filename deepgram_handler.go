@@ -170,7 +170,7 @@ func (c MyCallback) Message(mr *api.MessageResponse) error {
 	}
 
 	// Send message to app sync
-	SendMessage("api-key", message, c.h.ConnectionID, c.h.ChannelID, *c.resultsID, c.h.LanguageCode)
+	SendMessage(message, c.h.ConnectionID, c.h.ChannelID, *c.resultsID, c.h.LanguageCode, c.h.Config)
 
 	return nil
 }
@@ -220,9 +220,9 @@ func (c MyCallback) UnhandledEvent(byData []byte) error {
 	return nil
 }
 
-func SendMessage(apiKey string, content string, connectionID string, channel string, resultsID string, language string) {
+func SendMessage(content string, connectionID string, channel string, resultsID string, language string, config Config) {
 	// URL AppSync của bạn
-	appsyncURL := "https://4fhzbjhz55bt5pw5qvryydwgby.appsync-api.ap-southeast-1.amazonaws.com/graphql"
+	appsyncURL := config.AppSyncUrl
 
 	// Tạo GraphQL client
 	clientGraphQL := graphql.NewClient(appsyncURL)
@@ -264,7 +264,7 @@ func SendMessage(apiKey string, content string, connectionID string, channel str
 	req.Var("resultsId", resultsID)
 	req.Var("language", language)
 
-	req.Header.Set("x-api-key", apiKey)
+	req.Header.Set("x-api-key", config.AppSyncApiKey)
 
 	// Gửi yêu cầu đến AppSync
 	ctx := context.Background()
