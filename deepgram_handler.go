@@ -222,7 +222,7 @@ func (c MyCallback) UnhandledEvent(byData []byte) error {
 
 func SendMessage(content string, connectionID string, channel string, resultsID string, language string, config Config) {
 	// URL AppSync của bạn
-	appsyncURL := config.AppSyncUrl
+	appsyncURL := config.AppSyncURL
 
 	// Tạo GraphQL client
 	clientGraphQL := graphql.NewClient(appsyncURL)
@@ -264,7 +264,7 @@ func SendMessage(content string, connectionID string, channel string, resultsID 
 	req.Var("resultsId", resultsID)
 	req.Var("language", language)
 
-	req.Header.Set("x-api-key", config.AppSyncApiKey)
+	req.Header.Set("x-api-key", config.AppSyncAPIKey)
 
 	// Gửi yêu cầu đến AppSync
 	ctx := context.Background()
