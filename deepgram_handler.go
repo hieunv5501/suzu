@@ -313,7 +313,7 @@ func (h *DeepGramHandler) Handle(ctx context.Context, reader io.Reader) (*io.Pip
 		Channels:    int(h.ChannelCount),
 		// To get UtteranceEnd, the following must be set:
 		InterimResults: true,
-		UtteranceEndMs: "1000",
+		UtteranceEndMs: "500",
 		// End of UtteranceEnd settings
 	}
 
