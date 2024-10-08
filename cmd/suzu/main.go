@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	client "github.com/deepgram/deepgram-go-sdk/pkg/client/listen"
 	"log"
 	"strings"
 
@@ -38,11 +37,6 @@ func main() {
 		// ロガー初期化に失敗したら Fatal で終了
 		log.Fatal("cannot parse config file, err=", err)
 	}
-
-	// init library
-	client.Init(client.InitLib{
-		LogLevel: client.LogLevelDebug, // LogLevelDefault, LogLevelFull, LogLevelDebug, LogLevelTrace
-	})
 
 	suzu.ShowConfig(config)
 
