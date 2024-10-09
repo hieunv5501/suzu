@@ -109,9 +109,9 @@ type Config struct {
 	GcpResultStability bool `ini:"gcp_result_stability"`
 
 	// deep gram
-	DeepGramAPIKey string `ini:"deep_gram_api_key"`
-	AppSyncURL     string `ini:"app_sync_url"`
-	AppSyncAPIKey  string `ini:"app_sync_api_key"`
+	DeepGramAPIKey      string `ini:"deep_gram_api_key"`
+	AppSyncURL          string `ini:"app_sync_url"`
+	AppSyncURLGetAPIKey string `ini:"app_sync_url_get_api_key"`
 }
 
 func NewConfig(configFilePath string) (*Config, error) {

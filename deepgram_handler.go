@@ -8,7 +8,9 @@ import (
 	"github.com/deepgram/deepgram-go-sdk/pkg/client/interfaces"
 	"github.com/machinebox/graphql"
 	"io"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"strconv"
 	"strings"
 	"sync"
@@ -108,12 +110,13 @@ type Transcripts struct {
 
 // MyCallback Implement your own callback
 type MyCallback struct {
-	sb          *strings.Builder
-	h           *DeepGramHandler
-	w           *io.PipeWriter
-	ctx         context.Context
-	transcripts *[]Transcripts
-	resultsID   *string
+	sb            *strings.Builder
+	h             *DeepGramHandler
+	w             *io.PipeWriter
+	ctx           context.Context
+	transcripts   *[]Transcripts
+	resultsID     *string
+	appsyncApiKey string
 }
 
 func (c MyCallback) Message(mr *api.MessageResponse) error {
@@ -170,7 +173,7 @@ func (c MyCallback) Message(mr *api.MessageResponse) error {
 	}
 
 	// Send message to app sync
-	SendMessage(message, c.h.ConnectionID, c.h.ChannelID, *c.resultsID, c.h.LanguageCode, c.h.Config)
+	SendMessage(c.appsyncApiKey, message, c.h.ConnectionID, c.h.ChannelID, *c.resultsID, c.h.LanguageCode, c.h.Config)
 
 	return nil
 }
@@ -220,7 +223,7 @@ func (c MyCallback) UnhandledEvent(byData []byte) error {
 	return nil
 }
 
-func SendMessage(content string, connectionID string, channel string, resultsID string, language string, config Config) {
+func SendMessage(apiKey string, content string, connectionID string, channel string, resultsID string, language string, config Config) {
 	// URL AppSync của bạn
 	appsyncURL := config.AppSyncURL
 
@@ -264,7 +267,7 @@ func SendMessage(content string, connectionID string, channel string, resultsID 
 	req.Var("resultsId", resultsID)
 	req.Var("language", language)
 
-	req.Header.Set("x-api-key", config.AppSyncAPIKey)
+	req.Header.Set("x-api-key", apiKey)
 
 	// Gửi yêu cầu đến AppSync
 	ctx := context.Background()
@@ -274,6 +277,30 @@ func SendMessage(content string, connectionID string, channel string, resultsID 
 	}
 
 	log.Printf("Message sent: %+v\n", respData)
+}
+
+type AppsyncApiKeyResponse struct {
+	ApiKey string `json:"api_key"`
+}
+
+func GetAppsyncApiKey(config Config) string {
+	url := config.AppSyncURLGetAPIKey
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatalf("Error calling API: %v", err)
+	}
+	defer resp.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("Error reading response body: %v", err)
+	}
+
+	var appsyncApiKeyResponse AppsyncApiKeyResponse
+	err = json.Unmarshal(bodyBytes, &appsyncApiKeyResponse)
+	if err != nil {
+		log.Fatalf("Error decoding JSON: %v", err)
+	}
+	return appsyncApiKeyResponse.ApiKey
 }
 
 func (h *DeepGramHandler) Handle(ctx context.Context, reader io.Reader) (*io.PipeReader, error) {
@@ -317,14 +344,16 @@ func (h *DeepGramHandler) Handle(ctx context.Context, reader io.Reader) (*io.Pip
 		// End of UtteranceEnd settings
 	}
 
+	var apiKey = GetAppsyncApiKey(h.Config)
 	// implement your own callback
 	callback := MyCallback{
-		sb:          &strings.Builder{},
-		w:           w,
-		h:           h,
-		ctx:         ctx,
-		transcripts: &transcripts,
-		resultsID:   &resultsID,
+		sb:            &strings.Builder{},
+		w:             w,
+		h:             h,
+		ctx:           ctx,
+		transcripts:   &transcripts,
+		resultsID:     &resultsID,
+		appsyncApiKey: apiKey,
 	}
 
 	// create a Deepgram client
