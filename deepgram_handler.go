@@ -275,7 +275,7 @@ func SendMessage(apiKey string, content string, connectionID string, channel str
 }
 
 type appsyncAPIKeyResponse struct {
-	ApiKey string `json:"api_key"`
+	APIKey string `json:"api_key"`
 }
 
 func GetappsyncAPIKey(config Config) string {
@@ -304,7 +304,7 @@ func GetappsyncAPIKey(config Config) string {
 			Msg("Error decoding JSON")
 		return ""
 	}
-	return appsyncAPIKeyResponse.ApiKey
+	return appsyncAPIKeyResponse.APIKey
 }
 
 func (h *DeepGramHandler) Handle(ctx context.Context, reader io.Reader) (*io.PipeReader, error) {
