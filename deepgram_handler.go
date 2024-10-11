@@ -9,7 +9,6 @@ import (
 	"github.com/machinebox/graphql"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -231,7 +230,7 @@ func SendMessage(apiKey string, content string, connectionID string, channel str
 	clientGraphQL := graphql.NewClient(appsyncURL)
 
 	// Thêm các header để xác thực
-	clientGraphQL.Log = func(s string) { log.Println(s) }
+	clientGraphQL.Log = func(s string) { zlog.Info().Msg(s) }
 
 	// Mutation để gửi tin nhắn
 	mutation := `
@@ -273,10 +272,10 @@ func SendMessage(apiKey string, content string, connectionID string, channel str
 	ctx := context.Background()
 	var respData map[string]interface{}
 	if err := clientGraphQL.Run(ctx, req, &respData); err != nil {
-		log.Fatal(err)
+		zlog.Error().
+			Err(err).
+			Msg("ClientGraphQL error")
 	}
-
-	log.Printf("Message sent: %+v\n", respData)
 }
 
 type AppsyncApiKeyResponse struct {
@@ -287,18 +286,24 @@ func GetAppsyncApiKey(config Config) string {
 	url := config.AppSyncURLGetAPIKey
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Fatalf("Error calling API: %v", err)
+		zlog.Error().
+			Err(err).
+			Msg("Error calling API GetAppsyncApiKey")
 	}
 	defer resp.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalf("Error reading response body: %v", err)
+		zlog.Error().
+			Err(err).
+			Msg("Error reading response body")
 	}
 
 	var appsyncApiKeyResponse AppsyncApiKeyResponse
 	err = json.Unmarshal(bodyBytes, &appsyncApiKeyResponse)
 	if err != nil {
-		log.Fatalf("Error decoding JSON: %v", err)
+		zlog.Error().
+			Err(err).
+			Msg("Error decoding JSON")
 	}
 	return appsyncApiKeyResponse.ApiKey
 }
