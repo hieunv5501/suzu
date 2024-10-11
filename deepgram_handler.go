@@ -229,9 +229,6 @@ func SendMessage(apiKey string, content string, connectionID string, channel str
 	// Tạo GraphQL client
 	clientGraphQL := graphql.NewClient(appsyncURL)
 
-	// Thêm các header để xác thực
-	clientGraphQL.Log = func(s string) { zlog.Info().Msg(s) }
-
 	// Mutation để gửi tin nhắn
 	mutation := `
         mutation SendMessage(
