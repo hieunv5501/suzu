@@ -8,7 +8,6 @@ import (
 	"github.com/deepgram/deepgram-go-sdk/pkg/client/interfaces"
 	"github.com/machinebox/graphql"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -115,7 +114,7 @@ type MyCallback struct {
 	ctx           context.Context
 	transcripts   *[]Transcripts
 	resultsID     *string
-	appsyncApiKey string
+	appsyncAPIKey string
 }
 
 func (c MyCallback) Message(mr *api.MessageResponse) error {
@@ -172,7 +171,7 @@ func (c MyCallback) Message(mr *api.MessageResponse) error {
 	}
 
 	// Send message to app sync
-	SendMessage(c.appsyncApiKey, message, c.h.ConnectionID, c.h.ChannelID, *c.resultsID, c.h.LanguageCode, c.h.Config)
+	SendMessage(c.appsyncAPIKey, message, c.h.ConnectionID, c.h.ChannelID, *c.resultsID, c.h.LanguageCode, c.h.Config)
 
 	return nil
 }
@@ -275,21 +274,21 @@ func SendMessage(apiKey string, content string, connectionID string, channel str
 	}
 }
 
-type AppsyncApiKeyResponse struct {
+type appsyncAPIKeyResponse struct {
 	ApiKey string `json:"api_key"`
 }
 
-func GetAppsyncApiKey(config Config) string {
+func GetappsyncAPIKey(config Config) string {
 	url := config.AppSyncURLGetAPIKey
 	resp, err := http.Get(url)
 	if err != nil {
 		zlog.Error().
 			Err(err).
-			Msg("Error calling API GetAppsyncApiKey")
+			Msg("Error calling API GetappsyncAPIKey")
 		return ""
 	}
 	defer resp.Body.Close()
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		zlog.Error().
 			Err(err).
@@ -297,15 +296,15 @@ func GetAppsyncApiKey(config Config) string {
 		return ""
 	}
 
-	var appsyncApiKeyResponse AppsyncApiKeyResponse
-	err = json.Unmarshal(bodyBytes, &appsyncApiKeyResponse)
+	var appsyncAPIKeyResponse appsyncAPIKeyResponse
+	err = json.Unmarshal(bodyBytes, &appsyncAPIKeyResponse)
 	if err != nil {
 		zlog.Error().
 			Err(err).
 			Msg("Error decoding JSON")
 		return ""
 	}
-	return appsyncApiKeyResponse.ApiKey
+	return appsyncAPIKeyResponse.ApiKey
 }
 
 func (h *DeepGramHandler) Handle(ctx context.Context, reader io.Reader) (*io.PipeReader, error) {
@@ -349,7 +348,7 @@ func (h *DeepGramHandler) Handle(ctx context.Context, reader io.Reader) (*io.Pip
 		// End of UtteranceEnd settings
 	}
 
-	var apiKey = GetAppsyncApiKey(h.Config)
+	var apiKey = GetappsyncAPIKey(h.Config)
 	// implement your own callback
 	callback := MyCallback{
 		sb:            &strings.Builder{},
@@ -358,7 +357,7 @@ func (h *DeepGramHandler) Handle(ctx context.Context, reader io.Reader) (*io.Pip
 		ctx:           ctx,
 		transcripts:   &transcripts,
 		resultsID:     &resultsID,
-		appsyncApiKey: apiKey,
+		appsyncAPIKey: apiKey,
 	}
 
 	// create a Deepgram client
