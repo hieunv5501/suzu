@@ -278,13 +278,13 @@ type appsyncAPIKeyResponse struct {
 	APIKey string `json:"api_key"`
 }
 
-func GetappsyncAPIKey(config Config) string {
+func GetAppsyncAPIKey(config Config) string {
 	url := config.AppSyncURLGetAPIKey
 	resp, err := http.Get(url)
 	if err != nil {
 		zlog.Error().
 			Err(err).
-			Msg("Error calling API GetappsyncAPIKey")
+			Msg("Error calling API GetAppsyncAPIKey")
 		return ""
 	}
 	defer resp.Body.Close()
@@ -348,7 +348,7 @@ func (h *DeepGramHandler) Handle(ctx context.Context, reader io.Reader) (*io.Pip
 		// End of UtteranceEnd settings
 	}
 
-	var apiKey = GetappsyncAPIKey(h.Config)
+	var apiKey = GetAppsyncAPIKey(h.Config)
 	// implement your own callback
 	callback := MyCallback{
 		sb:            &strings.Builder{},
