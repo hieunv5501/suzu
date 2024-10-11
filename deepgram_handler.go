@@ -286,6 +286,7 @@ func GetAppsyncApiKey(config Config) string {
 		zlog.Error().
 			Err(err).
 			Msg("Error calling API GetAppsyncApiKey")
+		return ""
 	}
 	defer resp.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
@@ -293,6 +294,7 @@ func GetAppsyncApiKey(config Config) string {
 		zlog.Error().
 			Err(err).
 			Msg("Error reading response body")
+		return ""
 	}
 
 	var appsyncApiKeyResponse AppsyncApiKeyResponse
@@ -301,6 +303,7 @@ func GetAppsyncApiKey(config Config) string {
 		zlog.Error().
 			Err(err).
 			Msg("Error decoding JSON")
+		return ""
 	}
 	return appsyncApiKeyResponse.ApiKey
 }
